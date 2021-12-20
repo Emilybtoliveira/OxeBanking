@@ -1,8 +1,8 @@
-# **PROJETO OXEBANKING**
+# **Projeto OxeBanking**
 
-**Implementação do microserviço de <span style="color:#6959CD"> cartões </span> utilizando a linguagem GO**
+Implementação do microserviço de cartões utilizando a linguagem GO
 
-**Dupla:** Emily Brito de Oliveira e José Arthur Lopes Sabino
+**Dupla:** [Emily Brito de Oliveira](https://github.com/Emilybtoliveira) e [José Arthur Lopes Sabino]()
 
 ## Funcionalidades
 
@@ -27,12 +27,12 @@ oxebanking_cartao/
 			initDB()
 			closeDB()
 		cardDAO.go
-			GetCard()
-			CreateCard()
+			getCard()
+			createCard()
 			suspendCard()
 		virtualCardDAO.go
-			GetAllVirtualCards()
-			CreateVirtualCard()
+			getAllVirtualCards()
+			createVirtualCard()
 			RemoveVirtualCardByID()
 		billDAO.go
 			getBill()
@@ -41,13 +41,13 @@ oxebanking_cartao/
 			deductDebt()
 	handlers/
 		cardHandler.go
-			GetCardHandler()
-			CreateCardHandler()
+			getCardHandler()
+			createCardHandler()
 			suspendCardHandler()
 		virtualCardHandler.go
-			GetAllVirtualCardsHandler()
-			CreateVirtualCardHandler()
-			RemoveVirtualCardByIDHandler()
+			getAllVirtualCardsHandler()
+			createVirtualCardHandler()
+			removeVirtualCardByIDHandler()
 		billHandler.go
 			getBillHandler()
 			getCreditLimitHandler()
@@ -61,9 +61,7 @@ oxebanking_cartao/
     main.go
 ```
 
-
-
-
+<br></br>
 
 ### Detalhamento das funções
 
@@ -84,7 +82,7 @@ DAO/
 	cardDAO.go
 ```
 
-​				**`GetCard()`** - recebe o id do usuário e retorna o número do cartão e o tipo (crédito/debito).
+​				**`GetCard()`** - recebe o id do usuário e retorna algumas informações do cartão.
 
 ​				**`CreateCard()`** - recebe o id do usuário e senha desejada para criação (faz verificação prévia da já existência de um). Retorna o número do cartão.
 
@@ -112,7 +110,7 @@ DAO/
 
 ​				**`deductDebt()`** - recebe id do usuário e valor para abater da fatura. Retorna true/false.	
 
-
+<br></br>
 
 ### Diretório Handler 
 
@@ -151,9 +149,7 @@ handlers/
 
 ​				**`deductDebtHandler()`**  - redireciona para a função `deductDebt()` em `DAO/billDAO.go`.
 
-
-
-
+<br></br>
 
 ### Diretório Models 
 
@@ -166,9 +162,10 @@ models/
 		bill.go
 ```
 
+---
+<br></br>
 
-
-### URLs HTTP
+## URLs HTTP
 
 ### 	Cartão
 
@@ -184,14 +181,13 @@ models/
 /v1/card/
 ```
 
-​	<span style="color:red">**`PUT`** </span>`atualiza status do cartão físico para bloqueado`	
+​	<span style="color:red">**`PUT`** </span>`atualiza status ou a função do cartão físico`	
 
 ```http
 /v1/card/{id}
 ```
 
-​	
-
+<br></br>
 ### 	Cartão Virtual
 
 ​	<span style="color:red">**`GET`** </span> `retorna todos os cartões virtuais do usuário`	
@@ -213,7 +209,7 @@ models/
 ```
 
 ### 	
-
+<br></br>
 ### 	Fatura
 
 ​	<span style="color:red">**`GET`** </span> `retorna o valor da fatura`	
@@ -240,7 +236,65 @@ models/
 /v1/bill/{id}
 ```
 
-
-
+<br></br>
 ## Regras de Negócio
+
+### Cartões
+
+​	**`getCard`** 
+
+1. A solicitação de informações do cartão físico do usuário, retorna os seguintes dados: *os ultimos 4 dígitos, titular do cartão e a função (crédito/débito).*
+
+​	**`createCard`** 
+
+  1. A solicitação de gerar um novo cartão físico só é efetivada após verificação da já existência de um cartão físico *não bloqueado*.
+  2. Caso o mesmo esteja bloqueado, é criado um novo.
+  3. Sempre que um novo usuário é registrado, `createCard` deve ser utilizado para gerar a função *débito*.
+  4. `createCard` também será usado para atualizar a função do cartão de crédito para débito.
+
+​	**`suspendCard`** 
+
+1. Um cartão bloqueado não pode ser desbloqueado.
+2. O histórico de cartões do usuário é mantido no banco (bloqueados e ativo).
+3. Somente um cartão (último solicitado) poderá estar com status `ativo` .
+
+<br></br>
+### Cartões virtuais
+
+​	**`GetAllVirtualCards`** 
+
+1.  A solicitação de retorno de todos os cartões virtuais do usuário retorna: *o número completo do cartão, o nome do titular, o código de segurança, a validade e a função*.
+2. Apenas os cartões virtuais com status `ativo` são retornados.
+
+​		**`CreateVirtualCard`**
+
+1. Um usuário pode ter vários cartões virtuais, portanto não há nenhum tipo de verificação prévia.
+
+​		**`RemoveVirtualCardByID`** 
+
+1. A solicitação de remover um cartão virtual apenas altera o status do cartão para bloqueado.
+2. A mudança de status impede que o mesmo seja novamente acessado pelo usuário (não é retornado).
+3. O histórico dos cartões virtuais (bloqueados e ativos) é mantido no banco de dados.
+
+<br></br>
+
+### Fatura
+
+**`getBill`** 
+
+1. A solicitação de retorno da fatura, retorna: *valor da fatura pendente de pagamento, a data de fechamento, a data de vencimento e o status (aberta/fechada)*.
+2. **Até então, não será implementada a função de retornar todo o histórico de faturas do usuário.**
+
+​	**`getCreditLimit`** 
+
+1. A solicitação de retorno do limite de crédito retorna: *o valor atual setado pelo usuário, o valor total de limite que ele possui e o quanto do limite já está sendo usado*.
+
+​	**`adjustCreditLimit`** 
+
+1. O ajuste do limite só será efetivado sob verificação de que novo limite está no intervalo do limite total que o usuário possui.
+2. Caso o usuário sete um novo limite com um valor menor do que o que ele já usou na fatura atual, esse limite só será válido para a proxima fatura.
+
+​	**`deductDebt`**
+
+1. O abate no valor da fatura é feito após verificação de que a data de recebimento do valor devido está dentro do vencimento da fatura.
 
