@@ -1,4 +1,4 @@
-package main
+package DAO
 
 import (
   //espaço dos imports
