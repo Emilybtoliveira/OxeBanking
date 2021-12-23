@@ -24,21 +24,21 @@ Implementação do microserviço de cartões utilizando a linguagem GO
 oxebanking_cartao/
 	DAO/
 		connectionDAO.go
-			initDB()
-			closeDB()
+			InitDB()
+			CloseDB()
 		cardDAO.go
-			getCard()
-			createCard()
-			suspendCard()
+			GetCard()
+			CreateCard()
+			SuspendCard()
 		virtualCardDAO.go
-			getAllVirtualCards()
-			createVirtualCard()
+			GetAllVirtualCards()
+			CreateVirtualCard()
 			RemoveVirtualCardByID()
 		billDAO.go
-			getBill()
-			getCreditLimit()
-			adjustCreditLimit()
-			deductDebt()
+			GetBill()
+			GetCreditLimit()
+			AdjustCreditLimit()
+			DeductDebt()
 	handlers/
 		cardHandler.go
 			getCardHandler()
@@ -74,9 +74,9 @@ DAO/
 	connectionDAO.go
 ```
 
-​				**`initDB()`** - responsável por iniciar conexão com o banco de dados
+​				**`InitDB()`** - responsável por iniciar conexão com o banco de dados
 
-​				**`closeDB()`** - responsável por fechar conexão com o banco de dados
+​				**`CloseDB()`** - responsável por fechar conexão com o banco de dados
 
 ```go
 	cardDAO.go
@@ -102,13 +102,13 @@ DAO/
 	billDAO.go
 ```
 
-​				**`getBill()`** - recebe id do usuário e retorna valor da fatura.
+​				**`GetBill()`** - recebe id do usuário e retorna valor da fatura.
 
-​				**`getCreditLimit()`** - recebe id do usuário e retorna limite máximo e limite setado pelo usuário.
+​				**`GetCreditLimit()`** - recebe id do usuário e retorna limite máximo e limite setado pelo usuário.
 
-​				**`adjustCreditLimit()`** - recebe id do usuário e novo limite setado pelo usuário. Retorna true/false.
+​				**`AdjustCreditLimit()`** - recebe id do usuário e novo limite setado pelo usuário. Retorna true/false.
 
-​				**`deductDebt()`** - recebe id do usuário e valor para abater da fatura. Retorna true/false.	
+​				**`DeductDebt()`** - recebe id do usuário e valor para abater da fatura. Retorna true/false.	
 
 <br></br>
 
@@ -121,33 +121,33 @@ handlers/
 	cardHandler.go
 ```
 
-​				**`GetCardHandler()`** - redireciona para a função `GetCard()` em `DAO/cardDAO.go`.
+​				**`getCardHandler()`** - redireciona para a função `GetCard()` em `DAO/cardDAO.go`.
 
-​				**`CreateCardHandler()`** - redireciona para a função `CreateCard()` em `DAO/cardDAO.go`. 
+​				**`createCardHandler()`** - redireciona para a função `CreateCard()` em `DAO/cardDAO.go`. 
 
-​				**`suspendCardHandler()`** - redireciona para a função `suspendCard()` em `DAO/cardDAO.go`.		
+​				**`suspendCardHandler()`** - redireciona para a função `SuspendCard()` em `DAO/cardDAO.go`.		
 
 ```go
 	virtualCardHandler.go
 ```
 
-​				**`GetAllVirtualCardsHandler()`** - redireciona para a função `GetAllVirtualCard()` em `DAO/virtualCardDAO.go`.
+​				**`getAllVirtualCardsHandler()`** - redireciona para a função `GetAllVirtualCard()` em `DAO/virtualCardDAO.go`.
 
-​				**`CreateVirtualCardHandler()`**- redireciona para a função `CreateVirtualCard()` em `DAO/virtualCardDAO.go`.
+​				**`createVirtualCardHandler()`**- redireciona para a função `CreateVirtualCard()` em `DAO/virtualCardDAO.go`.
 
-​				**`RemoveVirtualCardByIDHandler()`**- redireciona para a função `RemoveVirtualCard()` em `DAO/virtualCardDAO.go`.
+​				**`removeVirtualCardByIDHandler()`**- redireciona para a função `RemoveVirtualCard()` em `DAO/virtualCardDAO.go`.
 
 ```go
 	billHandler.go
 ```
 
-​				**`getBillHandler()`**- redireciona para a função `getBill()` em `DAO/billDAO.go`.
+​				**`getBillHandler()`**- redireciona para a função `GetBill()` em `DAO/billDAO.go`.
 
-​				**`getCreditLimitHandler()`** - redireciona para a função `getCreditLimit()` em `DAO/billDAO.go`.
+​				**`getCreditLimitHandler()`** - redireciona para a função `GetCreditLimit()` em `DAO/billDAO.go`.
 
-​				**`adjustCreditLimitHandler()`** - redireciona para a função `adjustCreditLimit()` em `DAO/billDAO.go`.
+​				**`adjustCreditLimitHandler()`** - redireciona para a função `AdjustCreditLimit()` em `DAO/billDAO.go`.
 
-​				**`deductDebtHandler()`**  - redireciona para a função `deductDebt()` em `DAO/billDAO.go`.
+​				**`deductDebtHandler()`**  - redireciona para a função `DeductDebt()` em `DAO/billDAO.go`.
 
 <br></br>
 
