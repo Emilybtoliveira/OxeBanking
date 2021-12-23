@@ -8,7 +8,7 @@ func getAllVirtualCardsHandler() {
 	//redireciona para a função GetAllVirtualCard() em DAO/virtualCardDAO.go
 }
 
-func createVirtualCardHandler()() {
+func createVirtualCardHandler() {
 	//redireciona para a função CreateVirtualCard() em DAO/virtualCardDAO.go
 }
 
