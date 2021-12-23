@@ -1,4 +1,4 @@
-package handle
+package handler
 
 import (
   "https://github.com/Emilybtoliveira/OxeBanking/tree/main/DAO"
