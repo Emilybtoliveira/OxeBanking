@@ -13,5 +13,8 @@ func main(){
 	//dao.CloseDB()
 	
 	dao.CreateDB()
+	//dao.InsertClient(20, "Credit")
+	dao.InsertClient(20, "Debit")
+	//dao.InsertClient(30, "Test")
 	dao.CreateTables()
 }
