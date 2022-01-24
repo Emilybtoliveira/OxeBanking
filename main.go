@@ -16,9 +16,7 @@ func main() {
 
 	dao.CreateTables()
 
-	dao.InsertClient(2000, "")
-	dao.InsertClient(2001, "Credito")
-	dao.InsertClient(2002, "Credito")
-
-	//dao.InsertPhysicalCard(2001, "JOSE SILVA LOPES", "asdd67a8sdaf67a6d8dsa7d8asd67a8sd7a8d6")
+	dao.CreateCard(2000, "", "JOSE SILVA JUNIOR", "asdd67a8sdaf67a6d8dsa7d8asd67a8sd7a8d6")
+	//dao.CreateCard(2001, "Credito")
+	//dao.CreateCard(2002, "Credito")
 }

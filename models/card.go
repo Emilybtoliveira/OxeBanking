@@ -1,6 +1,5 @@
 package models
 
-
 type Card struct{
-	//elemento que vão no BD
+	//elementos que vão no BD
 }

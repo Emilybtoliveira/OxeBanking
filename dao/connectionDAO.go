@@ -67,7 +67,7 @@ func CreateTables() {
 	stmt1, err1 := db.Exec("DROP TABLE IF EXISTS public.client;")
 	CheckErr(err1)
 
-	stmt1, err2 := db.Exec("DROP TABLE IF EXISTS public.client; CREATE SEQUENCE IF NOT EXISTS client_id_seq START 1; CREATE TABLE IF NOT EXISTS public.client(    id integer NOT NULL DEFAULT nextval('client_id_seq'::regclass),    user_id integer NOT NULL,    card_function character varying(10) COLLATE pg_catalog.\"default\" DEFAULT 'Debito'::character varying,    CONSTRAINT client_pkey PRIMARY KEY (id, user_id),    CONSTRAINT user_id UNIQUE (user_id))TABLESPACE pg_default;ALTER TABLE IF EXISTS public.client    OWNER to postgres;")
+	stmt1, err2 := db.Exec("DROP TABLE IF EXISTS public.client; CREATE SEQUENCE IF NOT EXISTS client_id_seq START 1; CREATE TABLE IF NOT EXISTS public.client(    id integer NOT NULL DEFAULT nextval('client_id_seq'::regclass),    user_id integer NOT NULL,    card_function character varying(10) COLLATE pg_catalog.\"default\" DEFAULT 'Debito'::character varying, credit_limit integer DEFAULT 0, set_credit_limit integer DEFAULT 0,    CONSTRAINT client_pkey PRIMARY KEY (id, user_id),    CONSTRAINT user_id UNIQUE (user_id))TABLESPACE pg_default;ALTER TABLE IF EXISTS public.client    OWNER to postgres;")
 	CheckErr(err2)
 
 	stmt1, err3 := db.Exec("DROP TABLE IF EXISTS public.physical_cards;CREATE TABLE IF NOT EXISTS public.physical_cards(    user_id integer NOT NULL,    card_number bigint NOT NULL,    status character varying(10) COLLATE pg_catalog.\"default\" DEFAULT 'ativo'::character varying,    four_digit_password character varying(100) COLLATE pg_catalog.\"default\" NOT NULL,    owner character varying(30) COLLATE pg_catalog.\"default\" NOT NULL,    valid_thru character varying(6) COLLATE pg_catalog.\"default\" NOT NULL,    cvv integer NOT NULL,    emission_date timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP,    CONSTRAINT physical_cards_pkey PRIMARY KEY (card_number),    CONSTRAINT user_id FOREIGN KEY (user_id)        REFERENCES public.client (user_id) MATCH SIMPLE        ON UPDATE CASCADE        ON DELETE CASCADE        NOT VALID)TABLESPACE pg_default;ALTER TABLE IF EXISTS public.physical_cards    OWNER to postgres;")
@@ -81,49 +81,6 @@ func CreateTables() {
 
 	_ = stmt1
 	//fmt.Println(stmt1)
-}
-
-func InsertClient(user_id int64, card_function string) {
-	//InitDB()
-
-	query := ""
-
-	if card_function == "" {
-		query = fmt.Sprintf("INSERT INTO public.client(user_id) VALUES(%d)", user_id)
-	} else {
-		query = fmt.Sprintf("INSERT INTO public.client(user_id, card_function) VALUES(%d, '%s')", user_id, card_function)
-	}
-
-	fmt.Println(query)
-
-	stmt1, err1 := db.Exec(query)
-	CheckErr(err1)
-
-	_ = stmt1
-	//fmt.Println(stmt1)
-}
-
-func InsertPhysicalCard(user_id int64, owner string, password string) {
-	contador := 0
-
-	query := fmt.Sprintf("SELECT * FROM client WHERE user_id = %d;", user_id)
-
-	fmt.Println(query)
-	stmt1, err1 := db.Query(query)
-	CheckErr(err1)
-
-	//fmt.Println(stmt1)
-
-	for stmt1.Next() {
-		/* err = stmt1.Scan(&id, &user_id, &function)
-		CheckErr(err)
-
-		fmt.Printf("%d %d %s\n", id, user_id, function) */
-
-		contador += 1
-	}
-
-	fmt.Println(contador)
 }
 
 func CheckErr(err error) {
