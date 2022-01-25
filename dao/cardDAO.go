@@ -5,18 +5,9 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/Emilybtoliveira/OxeBanking/models"
 	_ "github.com/lib/pq"
 )
-
-type card struct {
-	user_id       int64
-	card_number   int64
-	status        string
-	password      string
-	owner         string
-	cvv           int16
-	emission_date string
-}
 
 //Função para gerar data de validade do cartão; Recebe a quantidade de anos à frente em offset;
 func generateValidThru(offset int) string {
@@ -45,14 +36,6 @@ func CreateCard(user_id int64, card_function string, owner string, password stri
 	CheckErr(err1)
 
 	if stmt1.Next() != true { //se entrar aqui, então nao existe um usuário cadastrado com esse id; nesse caso, é preciso inserí-lo em client antes de cadastrar um novo cartao
-		//esse abaixo é um exemplo de como ler o retorno de um select
-		/* var client models.Client
-
-		err = stmt1.Scan(&client.Id, &client.User_id, &client.Card_function, &client.Credit_limit, &client.Set_credit_limit)
-		CheckErr(err)
-
-		fmt.Printf("%d %d %s\n", client.Id, client.User_id, client.Card_function) */
-
 		fmt.Println("Cadastrando o cliente...")
 
 		query = ""
@@ -94,6 +77,7 @@ func CreateCard(user_id int64, card_function string, owner string, password stri
 
 	//Criando novo cartão
 	fmt.Println("Gerando novo cartão...")
+
 	//Gerando a data de vencimento do cartão
 	valid_thru := generateValidThru(5)
 	fmt.Printf("Validade do cartão gerada: %s\n", valid_thru)
@@ -109,14 +93,15 @@ func CreateCard(user_id int64, card_function string, owner string, password stri
 	fmt.Printf("Número do CVV gerado: %d\n", cvv)
 
 	/* Feito isso, aqui vai a query de inserir um novo cartão em physical_cards; lembrando que nao precisa informar status nem emission_date */
-	query = fmt.Sprintf("INSERT INTO public.physical_cards(user_id, card_number, four_digit_password, owner, valid_thru, cvv) VALUES (%d, %d, '%s', '%s', %s, %d);", user_id, card_number, password, owner, valid_thru, cvv)
+	query = fmt.Sprintf("INSERT INTO public.physical_cards(user_id, card_number, four_digit_password, owner, valid_thru, cvv) VALUES (%d, %d, '%s', '%s', '%s', %d);", user_id, card_number, password, owner, valid_thru, cvv)
 	fmt.Printf("Inserindo os seguintes dados: ID: %d, Numero do Cartao: %d, Senha: '%s', Proprietario: '%s', Validade: %s, CVV: %d\n", user_id, card_number, password, owner, valid_thru, cvv)
 	stmt1, err2 := db.Query(query)
 	CheckErr(err2)
+
 	return true
 }
 
-func GetCard(user_id int64) bool {
+func GetCard(user_id int) (models.Card, error) {
 	//recebe o id do usuário e retorna algumas informações do cartão
 	query := fmt.Sprintf("SELECT * FROM physical_cards WHERE user_id = %d;", user_id) //verificando se o user_id já é registrado no banco
 
@@ -124,27 +109,26 @@ func GetCard(user_id int64) bool {
 	stmt1, err1 := db.Query(query)
 	CheckErr(err1)
 
+	var card models.Card
+
 	if stmt1.Next() != true {
 		//retornando sem clientes
 		fmt.Println("Cliente inexistente")
-		return false
 	} else {
 		//cliente encontrado
-		useless_var := 0
-		cardInfo := card{}
-		err = stmt1.Scan(&cardInfo.user_id, &cardInfo.card_number, &cardInfo.status, &cardInfo.password, &cardInfo.owner, &useless_var, &cardInfo.cvv, &cardInfo.emission_date)
+
+		err = stmt1.Scan(&card.User_id, &card.Card_number, &card.Status, &card.Password, &card.Owner, &card.Valid_thru, &card.Cvv, &card.Emission_date)
 		CheckErr(err)
 
-		fmt.Printf("Nome do cliente: %s\nNumero do cartao: %d, Status do cartao: %s\n", cardInfo.owner, cardInfo.card_number, cardInfo.status)
+		//fmt.Printf("%d, %d, %s, %s, %s, %s, %d, %s", card.User_id, card.Card_number, card.Status, card.Password, card.Owner, card.Valid_thru, card.Cvv, card.Emission_date)
 	}
 
-	return true
+	return card, err
 }
 
+//recebe o id do usuário, altera status do cartão para suspenso e retorna true/false
 func SuspendCard(user_id int64) bool {
-	//recebe o id do usuário, altera status do cartão para suspenso e retorna true/false
-
-	query := fmt.Sprintf("UPDATE physical_cards SET status='suspenso' WHERE user_id = %d;", user_id) //verificando se o user_id já é registrado no banco
+	query := fmt.Sprintf("UPDATE physical_cards SET status='bloqueado' WHERE user_id = %d;", user_id) //verificando se o user_id já é registrado no banco
 
 	//fmt.Println(query)
 	stmt1, err1 := db.Query(query)
@@ -155,6 +139,6 @@ func SuspendCard(user_id int64) bool {
 		return false
 	}
 
-	fmt.Println("Cartao suspenso")
+	fmt.Println("Cartao bloqueado")
 	return true
 }
