@@ -25,31 +25,37 @@ func generateRandomNumbers(min, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-//Função de criação de cartão físico; Recebe informações do usuário e retorna o número do cartão;
-func CreateCard(user_id int64, card_function string, owner string, password string) bool {
-
+func selectClient(user_id int) bool {
 	fmt.Println("Checando se o cliente já existe..")
-	query := fmt.Sprintf("SELECT * FROM client WHERE user_id = %d;", user_id) //verificando se o user_id já é registrado no banco
+	query := fmt.Sprintf("SELECT * FROM client WHERE user_id = %d;", user_id)
 
 	fmt.Println(query)
 	stmt1, err1 := db.Query(query)
 	CheckErr(err1)
 
-	if stmt1.Next() != true { //se entrar aqui, então nao existe um usuário cadastrado com esse id; nesse caso, é preciso inserí-lo em client antes de cadastrar um novo cartao
+	if stmt1.Next() != true {
+		return false
+	} else {
+		return true
+	}
+}
+
+//Função de criação de cartão físico; Recebe informações do usuário e retorna o número do cartão;
+func CreateCard(user_id int, password string, owner string) (bool, error) {
+	var query string
+
+	//verificando se o user_id já é registrado no banco
+	client_exists := selectClient(user_id)
+
+	if !client_exists { //se entrar aqui, então nao existe um usuário cadastrado com esse id; nesse caso, é preciso inserí-lo em client antes de cadastrar um novo cartao
 		fmt.Println("Cadastrando o cliente...")
 
-		query = ""
+		query = fmt.Sprintf("INSERT INTO public.client(user_id) VALUES(%d)", user_id)
 
-		if card_function == "" {
-			query = fmt.Sprintf("INSERT INTO public.client(user_id) VALUES(%d)", user_id)
-		} else {
-			query = fmt.Sprintf("INSERT INTO public.client(user_id, card_function) VALUES(%d, '%s')", user_id, card_function)
-		}
 		fmt.Println(query)
 
 		stmt2, err1 := db.Exec(query)
 		CheckErr(err1)
-
 		_ = stmt2
 	} else { //Regra de negocio: se já existe o cliente, é preciso conferir se ele já possui um cartão físico com status ativo
 		fmt.Println("Checando se o cliente já possui cartão ativo...")
@@ -66,11 +72,9 @@ func CreateCard(user_id int64, card_function string, owner string, password stri
 			err = stmt3.Scan(&status)
 			CheckErr(err)
 
-			fmt.Printf("%s\n", status)
-
 			if status == "ativo" {
 				fmt.Println("Cliente já possui cartão ativo.")
-				return false
+				return false, err1
 			}
 		}
 	}
@@ -94,51 +98,109 @@ func CreateCard(user_id int64, card_function string, owner string, password stri
 
 	/* Feito isso, aqui vai a query de inserir um novo cartão em physical_cards; lembrando que nao precisa informar status nem emission_date */
 	query = fmt.Sprintf("INSERT INTO public.physical_cards(user_id, card_number, four_digit_password, owner, valid_thru, cvv) VALUES (%d, %d, '%s', '%s', '%s', %d);", user_id, card_number, password, owner, valid_thru, cvv)
-	fmt.Printf("Inserindo os seguintes dados: ID: %d, Numero do Cartao: %d, Senha: '%s', Proprietario: '%s', Validade: %s, CVV: %d\n", user_id, card_number, password, owner, valid_thru, cvv)
+	fmt.Println(query)
+
 	stmt1, err2 := db.Query(query)
 	CheckErr(err2)
+	_ = stmt1
 
-	return true
+	return true, err2
 }
 
+//recebe o id do usuário e retorna o número do cartão, titular, valid_thru
 func GetCard(user_id int) (models.Card, error) {
-	//recebe o id do usuário e retorna algumas informações do cartão
-	query := fmt.Sprintf("SELECT * FROM physical_cards WHERE user_id = %d;", user_id) //verificando se o user_id já é registrado no banco
+	query := fmt.Sprintf("SELECT card_number, owner, valid_thru FROM physical_cards WHERE user_id = %d and status='ativo';", user_id)
 
 	//fmt.Println(query)
 	stmt1, err1 := db.Query(query)
 	CheckErr(err1)
 
+	query = fmt.Sprintf("SELECT card_function FROM client WHERE user_id = %d;", user_id)
+	stmt2, err2 := db.Query(query)
+	CheckErr(err2)
+
 	var card models.Card
 
 	if stmt1.Next() != true {
 		//retornando sem clientes
-		fmt.Println("Cliente inexistente")
+		fmt.Println("Cliente inexistente ou sem cartões ativos.")
+	} else if stmt2.Next() != true {
+		fmt.Println("Cliente inexistente.")
 	} else {
 		//cliente encontrado
-
-		err = stmt1.Scan(&card.User_id, &card.Card_number, &card.Status, &card.Password, &card.Owner, &card.Valid_thru, &card.Cvv, &card.Emission_date)
+		err = stmt1.Scan(&card.Card_number, &card.Owner, &card.Valid_thru)
 		CheckErr(err)
 
-		//fmt.Printf("%d, %d, %s, %s, %s, %s, %d, %s", card.User_id, card.Card_number, card.Status, card.Password, card.Owner, card.Valid_thru, card.Cvv, card.Emission_date)
+		err = stmt2.Scan(&card.Card_function)
+		CheckErr(err)
+
+		card.User_id = user_id
+		fmt.Printf("Encontrado: %d, %d, %s, %s %s\n", card.User_id, card.Card_number, card.Owner, card.Valid_thru, card.Card_function)
 	}
 
 	return card, err
 }
 
 //recebe o id do usuário, altera status do cartão para suspenso e retorna true/false
-func SuspendCard(user_id int64) bool {
-	query := fmt.Sprintf("UPDATE physical_cards SET status='bloqueado' WHERE user_id = %d;", user_id) //verificando se o user_id já é registrado no banco
+func SuspendCard(user_id int) (bool, error) {
+	client_exists := selectClient(user_id) //verifica se o user_id existe primeiro
+
+	if !client_exists {
+		fmt.Println("Cliente não existe.")
+		return false, nil
+	}
+
+	fmt.Println("Cliente existe.")
+	query := fmt.Sprintf("UPDATE physical_cards SET status='bloqueado' WHERE user_id = %d and status = 'ativo';", user_id)
 
 	//fmt.Println(query)
-	stmt1, err1 := db.Query(query)
+	stmt1, err1 := db.Exec(query)
+
+	if err1 != nil {
+		fmt.Println("Problema na solicitacao")
+		return false, err1
+	}
+
+	rows_affected, err2 := stmt1.RowsAffected()
+	CheckErr(err2)
+	if rows_affected == 0 {
+		fmt.Println("Cliente não possui cartão ativo.")
+		return false, err1
+	}
+
+	query = fmt.Sprintf("SELECT * from physical_cards WHERE user_id = %d and status = 'ativo';", user_id)
+	stmt2, err1 := db.Query(query)
+	_ = stmt2
+
+	if err1 != nil {
+		fmt.Println("Algo deu errado.")
+		return false, err1
+	} else {
+		fmt.Println("Cartao bloqueado.")
+		return true, err1
+	}
+}
+
+func UpdateCardFunction(user_id int, credit_limit int, set_credit_limit int) (bool, error) {
+	client_exists := selectClient(user_id) //verifica se o user_id existe primeiro
+
+	if !client_exists {
+		fmt.Println("Cliente não existe.")
+		return false, nil
+	}
+
+	fmt.Println("Cliente existe.")
+	query := fmt.Sprintf("UPDATE client SET card_function='Credito/Debito', credit_limit = %d, set_credit_limit=%d WHERE user_id = %d;", credit_limit, set_credit_limit, user_id)
+
+	fmt.Println(query)
+	stmt1, err1 := db.Exec(query)
 	_ = stmt1
 
 	if err1 != nil {
 		fmt.Println("Problema na solicitacao")
-		return false
+		return false, err1
+	} else {
+		fmt.Println("Informações atualizadas.")
+		return true, err1
 	}
-
-	fmt.Println("Cartao bloqueado")
-	return true
 }

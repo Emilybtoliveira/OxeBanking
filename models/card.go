@@ -2,11 +2,11 @@ package models
 
 type Card struct {
 	User_id       int    `json:"id,omitempty"`
-	Card_number   int    `json:"card number,omitempty"`
-	Status        string `json:"card status,omitempty"`
-	Password      string `json:"encrypted password,omitempty"`
-	Owner         string `json:"card owner,omitempty"`
-	Valid_thru    string `json:"valid thru,omitempty"`
+	Card_number   int    `json:"card_number,omitempty"`
+	Password      string `json:"encrypted_password,omitempty"`
+	Owner         string `json:"card_owner,omitempty"`
+	Valid_thru    string `json:"valid_thru,omitempty"`
 	Cvv           int    `json:"cvv,omitempty"`
-	Emission_date string `json:"emission date,omitempty"`
+	Card_function string `json:"card_function,omitempty"`
+	Status        string `json:"status,omitempty"`
 }

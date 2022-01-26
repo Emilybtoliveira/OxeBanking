@@ -2,14 +2,20 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/Emilybtoliveira/OxeBanking/dao"
+	"github.com/Emilybtoliveira/OxeBanking/models"
 	"github.com/gorilla/mux"
 )
 
 func FormatResponseToJSON(w http.ResponseWriter, statusCode int, response interface{}) {
+	if response == nil || response == false {
+		response = "Cannot execute action. Client not found or with no active card."
+	}
+
 	json, err := json.Marshal(response)
 
 	if err != nil {
@@ -24,6 +30,7 @@ func FormatResponseToJSON(w http.ResponseWriter, statusCode int, response interf
 //redireciona para a função GetCard() em DAO/cardDAO.go
 func GetCardHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+
 	//fmt.Println(params["id"])
 
 	id, err := strconv.Atoi(params["id"])
@@ -46,10 +53,58 @@ func GetCardHandler(w http.ResponseWriter, r *http.Request) {
 
 //redireciona para a função CreateCard() em DAO/cardDAO.go
 func CreateCardHandler(w http.ResponseWriter, r *http.Request) {
+	var card models.Card
+	_ = json.NewDecoder(r.Body).Decode(&card)
+	//fmt.Println(card)
 
+	response, err := dao.CreateCard(card.User_id, card.Password, card.Owner)
+	if response {
+		FormatResponseToJSON(w, http.StatusOK, response)
+	} else if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	} else {
+		FormatResponseToJSON(w, http.StatusForbidden, response)
+	}
 }
 
 //redireciona para a função SuspendCard() em DAO/cardDAO.go
-func SuspendCardHandler(w http.ResponseWriter, r *http.Request) {
+func UpdateStatusHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
 
+	//fmt.Println(params["id"])
+
+	id, err := strconv.Atoi(params["id"])
+	dao.CheckErr(err)
+
+	response, err := dao.SuspendCard(id)
+	if response {
+		FormatResponseToJSON(w, http.StatusOK, response)
+	} else if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	} else {
+		FormatResponseToJSON(w, http.StatusForbidden, response)
+	}
+}
+
+//redireciona para a função UpdateCardFunction() em DAO/cardDAO.go
+func UpdateFunctionHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	var client models.Client
+	_ = json.NewDecoder(r.Body).Decode(&client)
+	fmt.Println(client)
+
+	id, err := strconv.Atoi(params["id"])
+	dao.CheckErr(err)
+
+	response, err := dao.UpdateCardFunction(id, client.Credit_limit, client.Set_credit_limit)
+	if response {
+		FormatResponseToJSON(w, http.StatusOK, response)
+	} else if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	} else {
+		FormatResponseToJSON(w, http.StatusForbidden, response)
+	}
 }

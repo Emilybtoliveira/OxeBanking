@@ -1,9 +1,9 @@
 package models
 
 type Client struct {
-	Id               int    `json:"id"`
-	User_id          int    `json:"user_id"`
-	Card_function    string `json:"card function"`
-	Credit_limit     string `json:"credit limit"`
-	Set_credit_limit string `json:"set credit limit"`
+	Id               int    `json:"id,omitempty"`
+	User_id          int    `json:"user_id,omitempty"`
+	Card_function    string `json:"card_function,omitempty"`
+	Credit_limit     int    `json:"credit_limit,omitempty"`
+	Set_credit_limit int    `json:"set_credit_limit,omitempty"`
 }

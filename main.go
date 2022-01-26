@@ -21,13 +21,12 @@ func main() {
 
 	dao.CreateTables()
 
-	dao.CreateCard(2000, "", "JOSE SILVA JUNIOR", "asdd67a8sdaf67a6d8dsa7d8asd67a8sd7a8d6")
-	//dao.CreateCard(2001, "Credito")
-	//dao.CreateCard(2002, "Credito")
+	//dao.CreateCard(2000, "asdd67a8sdaf67a6d8dsa7d8asd67a8sd7a8d6", "JOSE SILVA JUNIOR")
 
 	router := mux.NewRouter()
 	router.HandleFunc("/card/{id}", handlers.GetCardHandler).Methods("GET")
-	router.HandleFunc("/card/{id}", handlers.CreateCardHandler).Methods("POST")
-	router.HandleFunc("/contato/{id}", handlers.SuspendCardHandler).Methods("PUT")
+	router.HandleFunc("/card", handlers.CreateCardHandler).Methods("POST")
+	router.HandleFunc("/card/function/{id}", handlers.UpdateFunctionHandler).Methods("PUT")
+	router.HandleFunc("/card/status/{id}", handlers.UpdateStatusHandler).Methods("PUT")
 	log.Fatal(http.ListenAndServe("localhost:8000", router))
 }
