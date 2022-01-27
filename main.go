@@ -24,9 +24,9 @@ func main() {
 	//dao.CreateCard(2000, "asdd67a8sdaf67a6d8dsa7d8asd67a8sd7a8d6", "JOSE SILVA JUNIOR")
 
 	router := mux.NewRouter()
-	router.HandleFunc("/card/{id}", handlers.GetCardHandler).Methods("GET")
+	router.HandleFunc("/card", handlers.GetCardHandler).Methods("GET")
 	router.HandleFunc("/card", handlers.CreateCardHandler).Methods("POST")
-	router.HandleFunc("/card/function/{id}", handlers.UpdateFunctionHandler).Methods("PUT")
-	router.HandleFunc("/card/status/{id}", handlers.UpdateStatusHandler).Methods("PUT")
+	router.HandleFunc("/card/function", handlers.UpdateFunctionHandler).Methods("PUT")
+	router.HandleFunc("/card/status", handlers.UpdateStatusHandler).Methods("PUT")
 	log.Fatal(http.ListenAndServe("localhost:8000", router))
 }

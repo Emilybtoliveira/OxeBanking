@@ -115,7 +115,7 @@ func GetCard(user_id int) (models.Card, error) {
 	stmt1, err1 := db.Query(query)
 	CheckErr(err1)
 
-	query = fmt.Sprintf("SELECT card_function FROM client WHERE user_id = %d;", user_id)
+	query = fmt.Sprintf("SELECT card_function, credit_limit, set_credit_limit FROM client WHERE user_id = %d;", user_id)
 	stmt2, err2 := db.Query(query)
 	CheckErr(err2)
 
@@ -131,7 +131,7 @@ func GetCard(user_id int) (models.Card, error) {
 		err = stmt1.Scan(&card.Card_number, &card.Owner, &card.Valid_thru)
 		CheckErr(err)
 
-		err = stmt2.Scan(&card.Card_function)
+		err = stmt2.Scan(&card.Card_function, &card.Credit_limit, &card.Set_credit_limit)
 		CheckErr(err)
 
 		card.User_id = user_id

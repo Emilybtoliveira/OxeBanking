@@ -8,7 +8,6 @@ import (
 
 	"github.com/Emilybtoliveira/OxeBanking/dao"
 	"github.com/Emilybtoliveira/OxeBanking/models"
-	"github.com/gorilla/mux"
 )
 
 func FormatResponseToJSON(w http.ResponseWriter, statusCode int, response interface{}) {
@@ -29,12 +28,14 @@ func FormatResponseToJSON(w http.ResponseWriter, statusCode int, response interf
 
 //redireciona para a função GetCard() em DAO/cardDAO.go
 func GetCardHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+	fmt.Println()
+	params := r.URL.Query()["user_id"][0]
+	//params := mux.Vars(r)
+	//fmt.Println(mux.Vars(r))
 
-	//fmt.Println(params["id"])
-
-	id, err := strconv.Atoi(params["id"])
-	_ = err
+	id, err := strconv.Atoi(params)
+	dao.CheckErr(err)
+	fmt.Println(id)
 	/* response := dao.GetCard(id)
 	json.NewEncoder(w).Encode(response) */
 	//io.WriteString(w, response)
@@ -70,12 +71,12 @@ func CreateCardHandler(w http.ResponseWriter, r *http.Request) {
 
 //redireciona para a função SuspendCard() em DAO/cardDAO.go
 func UpdateStatusHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+	params := r.URL.Query()["user_id"][0]
+	//params := mux.Vars(r)
 
-	//fmt.Println(params["id"])
-
-	id, err := strconv.Atoi(params["id"])
+	id, err := strconv.Atoi(params)
 	dao.CheckErr(err)
+	fmt.Println(id)
 
 	response, err := dao.SuspendCard(id)
 	if response {
@@ -90,13 +91,16 @@ func UpdateStatusHandler(w http.ResponseWriter, r *http.Request) {
 
 //redireciona para a função UpdateCardFunction() em DAO/cardDAO.go
 func UpdateFunctionHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+	params := r.URL.Query()["user_id"][0]
+	//params := mux.Vars(r)
+
+	id, err := strconv.Atoi(params)
+	dao.CheckErr(err)
+	fmt.Println(id)
+
 	var client models.Client
 	_ = json.NewDecoder(r.Body).Decode(&client)
 	fmt.Println(client)
-
-	id, err := strconv.Atoi(params["id"])
-	dao.CheckErr(err)
 
 	response, err := dao.UpdateCardFunction(id, client.Credit_limit, client.Set_credit_limit)
 	if response {
