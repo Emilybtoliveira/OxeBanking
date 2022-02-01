@@ -21,7 +21,14 @@ func main() {
 
 	dao.CreateTables()
 
-	//dao.CreateCard(2000, "asdd67a8sdaf67a6d8dsa7d8asd67a8sd7a8d6", "JOSE SILVA JUNIOR")
+	/* //dao.CreateCard(2000, "asdd67a8sdaf67a6d8dsa7d8asd67a8sd7a8d6", "JOSE SILVA JUNIOR")
+	dao.CreateVirtualCard(2001, "EMILY B OLIVEIRA", "sla")
+	dao.CreateVirtualCard(2001, "EMILY B OLIVEIRA", "sla2")
+	card, err := dao.CreateVirtualCard(2001, "EMILY B OLIVEIRA", "sla3")
+	dao.CheckErr(err)
+	dao.GetAllVirtualCards(2001)
+	dao.RemoveVirtualCardByID(2001, card.Card_number)
+	dao.GetAllVirtualCards(2001) */
 
 	router := mux.NewRouter()
 	router.HandleFunc("/card", handlers.GetCardHandler).Methods("GET")

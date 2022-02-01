@@ -25,6 +25,7 @@ func generateRandomNumbers(min, max int) int {
 	return min + rand.Intn(max-min)
 }
 
+//Função usada sempre que se quer consultar a existencia do cliente.
 func selectClient(user_id int) bool {
 	fmt.Println("Checando se o cliente já existe..")
 	query := fmt.Sprintf("SELECT * FROM client WHERE user_id = %d;", user_id)
