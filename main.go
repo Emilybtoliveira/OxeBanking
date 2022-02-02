@@ -31,9 +31,16 @@ func main() {
 	dao.GetAllVirtualCards(2001) */
 
 	router := mux.NewRouter()
+
 	router.HandleFunc("/card", handlers.GetCardHandler).Methods("GET")
 	router.HandleFunc("/card", handlers.CreateCardHandler).Methods("POST")
+
 	router.HandleFunc("/card/function", handlers.UpdateFunctionHandler).Methods("PUT")
 	router.HandleFunc("/card/status", handlers.UpdateStatusHandler).Methods("PUT")
+
+	router.HandleFunc("/virtualcard", handlers.GetAllVirtualCardsHandler).Methods("GET")
+	router.HandleFunc("/virtualcard", handlers.CreateVirtualCardHandler).Methods("POST")
+	router.HandleFunc("/virtualcard", handlers.RemoveVirtualCardByIDHandler).Methods("DELETE")
+
 	log.Fatal(http.ListenAndServe("localhost:8000", router))
 }
