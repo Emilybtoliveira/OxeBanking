@@ -87,7 +87,6 @@ func GetAllVirtualCards(user_id int) ([]models.VirtualCard, error) {
 			return cards_list, err1
 		}
 	}
-
 	return nil, err1
 }
 
@@ -154,7 +153,7 @@ func RemoveVirtualCardByID(user_id, card_number int) (bool, error) {
 
 	fmt.Println("Cliente existe.")
 	query = fmt.Sprintf("UPDATE public.virtual_cards SET status='bloqueado' WHERE user_id = %d and card_number = %d;", user_id, card_number)
-	//fmt.Println(query)
+	fmt.Println(query)
 	stmt1, err1 := db.Exec(query)
 
 	if err1 != nil {

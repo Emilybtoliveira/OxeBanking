@@ -16,6 +16,7 @@ func FormatResponseToJSON(w http.ResponseWriter, statusCode int, response interf
 	}
 
 	json, err := json.Marshal(response)
+	//fmt.Println(json)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
