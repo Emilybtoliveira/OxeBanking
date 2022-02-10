@@ -182,7 +182,7 @@ func SuspendCard(user_id int) (bool, error) {
 	}
 }
 
-func UpdateCardFunction(user_id int, credit_limit int, set_credit_limit int) (bool, error) {
+func UpdateCardFunction(user_id, credit_limit, set_credit_limit int) (bool, error) {
 	client_exists := selectClient(user_id) //verifica se o user_id existe primeiro
 
 	if !client_exists {
@@ -196,7 +196,7 @@ func UpdateCardFunction(user_id int, credit_limit int, set_credit_limit int) (bo
 	fmt.Println(query)
 	stmt1, err1 := db.Exec(query)
 	_ = stmt1
-
+	
 	if err1 != nil {
 		fmt.Println("Problema na solicitacao")
 		return false, err1
